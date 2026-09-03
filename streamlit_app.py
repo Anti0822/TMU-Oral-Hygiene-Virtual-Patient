@@ -152,13 +152,53 @@ col1, col2 = st.columns(2)
 with col1:
     if st.button("🔄 重新開始病例", use_container_width=True):
         st.session_state.messages = []
+        st.session_state.show_exam = False
         st.rerun()
 
 with col2:
-    st.button(
-        "📝 結束問診並評分（下一階段加入）",
-        disabled=True,
-        use_container_width=True,
-    )
+    if st.button("🩺 申請口腔檢查", use_container_width=True):
+        st.session_state.show_exam = True
 
-st.caption("目前為 MVP：只測試 AI 病人問診。請勿輸入真實病人可識別資料。")
+
+# ==========================================
+# Clinical Supervisor：口腔檢查結果
+# ==========================================
+
+if st.session_state.get("show_exam", False):
+
+    st.subheader("🩺 Clinical Supervisor｜口腔檢查結果")
+
+    exam = case["clinical_exam"]
+
+    st.markdown("### ① 顏面與顳顎關節")
+    st.write(exam["extraoral"])
+
+    st.markdown("### ② 口腔黏膜與唾液")
+    st.write(exam["oral_mucosa"])
+
+    st.markdown("### ③ 牙菌斑")
+    st.write(exam["plaque"])
+    st.write(exam["plaque_score"])
+
+    st.markdown("### ④ 牙齦狀況")
+    st.write(exam["gingiva"])
+
+    st.markdown("### ⑤ Bleeding on Probing（BOP）")
+    st.write(exam["bop"])
+
+    st.markdown("### ⑥ 牙周探診")
+    st.write(exam["periodontal"])
+
+    st.markdown("### ⑦ 齲齒相關發現")
+    st.write(exam["caries"])
+
+    st.markdown("### ⑧ 整體口腔清潔")
+    st.write(exam["oral_hygiene"])
+
+    st.info(exam["supervisor_note"])
+
+
+st.caption(
+    "目前為教學 MVP：AI 虛擬病人＋Clinical Supervisor。"
+    "請勿輸入真實病人可識別資料。"
+)
