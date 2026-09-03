@@ -38,13 +38,13 @@ def clear_case_state():
 cases = load_case_files()
 
 if not cases:
-    st.error("找不到病例檔案。請確認 case01.json / case02.json 已上傳。")
+    st.error("找不到病例檔案。請確認 case01.json / case02.json / case03.json 已上傳。")
     st.stop()
 
 case_names = list(cases.keys())
 
 st.title("🦷 TMU 口腔衛生學系 AI 虛擬病人")
-st.caption("Multi-Case v3.0｜Patient Agent＋Clinical Supervisor＋Deterministic Evaluator")
+st.caption("Multi-Case v3.1｜Patient Agent＋Caregiver Role＋Clinical Supervisor＋Deterministic Evaluator")
 
 selected_file = st.selectbox(
     "📚 選擇虛擬病人病例",
@@ -91,8 +91,10 @@ with st.expander("📋 學生可見病例起始資訊", expanded=True):
 patient_instructions = f"""
 你正在進行口腔衛生教育的虛擬病人模擬。
 
-你的唯一角色是「{case['patient_name']}」，{case['age']} 歲，{case['sex']}。
-你必須忠實依照病例資料回答學生，不可跳出病人角色。
+你的主要角色是「{case['patient_name']}」，{case['age']} 歲，{case['sex']}。
+你必須忠實依照病例資料回答學生，不可跳出病例角色。
+如果病例資料中包含 caregiver，且學生明確詢問媽媽、家長或照顧者，
+可以依 caregiver 與病例資料改由照顧者回答；否則預設由病人本人回答。
 
 病人可知的病例資料如下：
 {json.dumps(patient_case, ensure_ascii=False, indent=2)}
@@ -239,7 +241,7 @@ if st.session_state.get("show_exam", False):
                 st.write(plan["preventive_plan"])
 
             st.divider()
-            st.subheader("📊 Deterministic Evaluator v3.0｜固定規則形成性評量")
+            st.subheader("📊 Deterministic Evaluator v3.1｜固定規則形成性評量")
             st.info(
                 "分數完全由固定規則計算；AI 不參與計分。"
                 "同一病例、同一問診紀錄、同一份答案會得到相同分數。"
@@ -463,6 +465,180 @@ if st.session_state.get("show_exam", False):
                                                       "戒菸資源", "醫療團隊"])},
                 }
 
+
+            def build_vp03_rules():
+                return {
+                    # Problem identification: 20
+                    "P1": {
+                        "label": "辨識牙菌斑控制不佳與後牙清潔不足",
+                        "points": 4,
+                        "met": has_any(problem_text, ["牙菌斑", "plaque", "後牙清潔", "清潔不足"])
+                    },
+                    "P2": {
+                        "label": "辨識既往齲齒／填補經驗",
+                        "points": 4,
+                        "met": has_any(problem_text, ["既往齲齒", "蛀牙經驗", "填補", "補牙", "乳臼齒齲齒"])
+                    },
+                    "P3": {
+                        "label": "辨識疑似新齲齒病灶或白斑樣變化並需牙醫確認",
+                        "points": 4,
+                        "met": has_any(problem_text, ["疑似齲齒", "齲齒病灶", "白斑", "白斑樣", "蛀牙"]) and
+                               has_any(all_plan_text, ["牙醫師", "牙醫", "進一步確認", "評估", "轉介"])
+                    },
+                    "P4": {
+                        "label": "辨識第一大臼齒深窩溝／新萌出恆牙之預防需求",
+                        "points": 4,
+                        "met": has_any(problem_text, ["第一大臼齒", "六歲臼齒", "深窩溝", "窩溝", "新萌出", "恆牙"])
+                    },
+                    "P5": {
+                        "label": "辨識夜間刷牙不規律、家長監督與牙間清潔不足",
+                        "points": 4,
+                        "met": count_domains(problem_text, [
+                            ["晚上不刷", "夜間刷牙不規律", "晚上不一定", "刷牙不規律"],
+                            ["家長監督", "媽媽協助", "家長協助", "只提醒", "監督不足"],
+                            ["牙線", "牙間清潔", "沒有牙間清潔", "幾乎沒有使用牙線"]
+                        ]) >= 2
+                    },
+
+                    # Risk assessment: 25
+                    "R1": {
+                        "label": "連結含糖飲料／零食攝取頻率與齲齒風險",
+                        "points": 5,
+                        "met": has_all_groups(risk_text, [
+                            ["含糖飲料", "奶茶", "果汁", "餅乾", "糖果", "巧克力", "甜點", "零食", "糖"],
+                            ["齲齒", "蛀牙", "風險", "糖暴露"]
+                        ])
+                    },
+                    "R2": {
+                        "label": "辨識既往齲齒與目前疑似病灶代表較高齲齒風險",
+                        "points": 5,
+                        "met": count_domains(risk_text, [
+                            ["既往齲齒", "以前蛀牙", "填補", "補牙"],
+                            ["疑似齲齒", "白斑", "新病灶", "蛀牙"],
+                            ["高齲齒風險", "較高齲齒風險", "齲齒風險高", "高風險"]
+                        ]) >= 2
+                    },
+                    "R3": {
+                        "label": "辨識刷牙不足、家長監督不足與牙間清潔不足的風險",
+                        "points": 5,
+                        "met": count_domains(risk_text, [
+                            ["晚上不刷", "夜間刷牙", "刷牙不規律", "一天一次"],
+                            ["家長監督", "媽媽協助", "家長協助", "監督不足"],
+                            ["牙線", "牙間清潔", "牙間清潔不足"]
+                        ]) >= 2
+                    },
+                    "R4": {
+                        "label": "連結新萌出第一大臼齒／深窩溝與齲齒預防需求",
+                        "points": 5,
+                        "met": has_all_groups(all_plan_text, [
+                            ["第一大臼齒", "六歲臼齒", "深窩溝", "窩溝", "新萌出"],
+                            ["預防", "齲齒", "蛀牙", "封填", "清潔"]
+                        ])
+                    },
+                    "R5": {
+                        "label": "辨識保護因子與家庭改變意願",
+                        "points": 5,
+                        "met": has_any(risk_text, [
+                            "白開水", "含氟牙膏", "媽媽願意", "家長願意",
+                            "願意協助", "願意減少含糖飲料", "願意配合", "解釋後願意配合"
+                        ])
+                    },
+
+                    # Preventive care plan: 25
+                    "C1": {
+                        "label": "提出早晚含氟牙膏刷牙並由家長協助／檢查",
+                        "points": 5,
+                        "met": has_any(care_text, ["早晚", "每天兩次", "至少兩次", "2次"]) and
+                               has_any(care_text, ["含氟牙膏", "含氟"]) and
+                               has_any(care_text, ["家長協助", "媽媽協助", "家長檢查", "媽媽檢查", "陪刷", "監督"])
+                    },
+                    "C2": {
+                        "label": "提出降低糖暴露頻率並以白開水取代含糖飲料",
+                        "points": 5,
+                        "met": has_any(care_text, ["降低", "減少", "避免", "控制"]) and
+                               has_any(care_text, ["含糖飲料", "甜點", "零食", "糖果", "餅乾", "糖"]) and
+                               has_any(care_text, ["白開水", "水", "集中於正餐", "固定時段"])
+                    },
+                    "C3": {
+                        "label": "提出專業氟化物預防方向且不要求特定 ppm",
+                        "points": 5,
+                        "met": has_any(care_text, ["專業氟化物", "氟化物預防", "塗氟", "含氟牙膏", "防齲"])
+                    },
+                    "C4": {
+                        "label": "提出第一大臼齒窩溝封填評估／後牙加強清潔",
+                        "points": 5,
+                        "met": has_any(care_text, ["窩溝封填", "溝隙封填", "sealant", "第一大臼齒", "六歲臼齒"]) and
+                               has_any(care_text, ["牙醫師", "牙醫", "評估", "轉介", "清潔"])
+                    },
+                    "C5": {
+                        "label": "提出兒童與家長共同可執行的小目標與正向衛教",
+                        "points": 5,
+                        "met": has_any(care_text, ["小目標", "共同設定", "一起", "媽媽", "家長"]) and
+                               has_any(care_text, ["正向", "鼓勵", "不責備", "避免責備", "可執行", "逐步"])
+                    },
+
+                    # Clinical reasoning: 15
+                    "L1": {
+                        "label": "能把糖暴露、牙菌斑與既往齲齒連結為較高齲齒風險",
+                        "points": 5,
+                        "met": count_domains(all_plan_text, [
+                            ["含糖飲料", "零食", "糖果", "餅乾", "甜點", "糖"],
+                            ["牙菌斑", "plaque", "清潔不足"],
+                            ["既往齲齒", "填補", "補牙", "蛀牙經驗"],
+                            ["高齲齒風險", "較高齲齒風險", "風險"]
+                        ]) >= 3
+                    },
+                    "L2": {
+                        "label": "能把新萌出深窩溝第一大臼齒與封填／預防需求連結",
+                        "points": 5,
+                        "met": has_all_groups(all_plan_text, [
+                            ["第一大臼齒", "六歲臼齒", "深窩溝", "窩溝"],
+                            ["窩溝封填", "sealant", "預防", "清潔"]
+                        ])
+                    },
+                    "L3": {
+                        "label": "能區分口衛學生預防照護與牙醫師診斷／治療角色",
+                        "points": 5,
+                        "met": has_any(care_text, ["牙醫師", "牙醫", "轉介", "進一步確認", "評估"]) and
+                               has_any(care_text, ["刷牙", "飲食", "衛教", "牙線", "家長", "含氟"])
+                    },
+
+                    # Patient-centered communication: 10
+                    "M1": {
+                        "label": "問診同時涵蓋兒童症狀與家長掌握的照護／飲食資訊",
+                        "points": 5,
+                        "met": count_domains(transcript, [
+                            ["哪一顆", "酸", "痛", "晚上痛", "痛醒"],
+                            ["慢性病", "過敏", "用藥"],
+                            ["蛀牙", "補牙", "填補"],
+                            ["看牙", "牙醫", "多久"],
+                            ["刷牙", "早上", "晚上"],
+                            ["含氟牙膏", "牙膏"],
+                            ["媽媽", "家長", "協助", "監督"],
+                            ["牙線", "牙間"],
+                            ["飲料", "奶茶", "果汁", "含糖"],
+                            ["零食", "餅乾", "糖果", "巧克力"],
+                            ["睡前", "調味乳"],
+                            ["害怕", "緊張", "看牙"]
+                        ]) >= 7
+                    },
+                    "M2": {
+                        "label": "溝通兼顧孩子與家長、避免責備並採正向共同決策",
+                        "points": 5,
+                        "met": has_any(care_text, ["孩子", "小晴", "兒童"]) and
+                               has_any(care_text, ["媽媽", "家長", "照顧者"]) and
+                               has_any(care_text, ["不責備", "避免責備", "正向", "鼓勵", "共同設定", "一起"])
+                    },
+
+                    # Follow-up / referral: 5
+                    "F1": {
+                        "label": "提出合理追蹤並轉介牙醫師評估疑似齲齒／窩溝封填",
+                        "points": 5,
+                        "met": has_any(care_text, ["3個月", "三個月", "追蹤", "重新評估", "回診"]) and
+                               has_any(care_text, ["牙醫師", "牙醫", "轉介", "進一步確認", "窩溝封填"])
+                    },
+                }
+
             if case["case_id"] == "VP01":
                 rules = build_vp01_rules()
                 teacher_extensions = [
@@ -479,6 +655,15 @@ if st.session_state.get("show_exam", False):
                     "是否需要 SRP／根面整平屬後續牙周專業診斷與治療規劃，學生不需自行下治療處方。",
                     "戒菸藥物或尼古丁替代治療可由具資格的醫療專業人員依病人狀況評估；本案例核心著重簡短戒菸介入、動機評估與適當轉介。",
                     "若未來發現持續性或可疑口腔黏膜病灶，應轉介牙醫師進一步評估；本次檢查未見明顯可疑病灶。",
+                ]
+            elif case["case_id"] == "VP03":
+                rules = build_vp03_rules()
+                teacher_extensions = [
+                    "疑似齲齒病灶與白斑樣變化需由牙醫師進一步確認；口衛學生重點是辨識風險、預防照護與適當轉介。",
+                    "第一大臼齒是否適合窩溝封填，應由牙醫師依萌出程度、窩溝型態與個別齲齒風險評估；學生提出評估需求即可。",
+                    "本病例不要求學生指定含氟牙膏 ppm、專業氟化物品牌或固定處方頻率；重點是合理使用含氟牙膏與專業氟化物預防方向。",
+                    "影像檢查是否需要由牙醫師依臨床情況決定；學生未主動指定 X 光不扣分。",
+                    "兒童口腔衛教應同時支持孩子與照顧者，避免把責任歸咎於孩子或家長。",
                 ]
             else:
                 st.error("此病例尚未建立固定評分規則。")
@@ -585,5 +770,5 @@ if st.session_state.get("show_exam", False):
 
 st.caption(
     "目前為教學 MVP：AI 虛擬病人＋Clinical Supervisor＋學生臨床判斷＋"
-    "Deterministic Evaluator v3.0。請勿輸入真實病人可識別資料。"
+    "Deterministic Evaluator v3.1。請勿輸入真實病人可識別資料。"
 )
