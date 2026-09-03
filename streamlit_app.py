@@ -38,13 +38,13 @@ def clear_case_state():
 cases = load_case_files()
 
 if not cases:
-    st.error("找不到病例檔案。請確認 case01.json / case02.json / case03.json 已上傳。")
+    st.error("找不到病例檔案。請確認 case01.json–case08.json 已上傳。")
     st.stop()
 
 case_names = list(cases.keys())
 
 st.title("🦷 TMU 口腔衛生學系 AI 虛擬病人")
-st.caption("Multi-Case v3.1｜Patient Agent＋Caregiver Role＋Clinical Supervisor＋Deterministic Evaluator")
+st.caption("Multi-Case v4.0｜Patient Agent＋Caregiver Role＋Clinical Supervisor＋Deterministic Evaluator")
 
 selected_file = st.selectbox(
     "📚 選擇虛擬病人病例",
@@ -177,6 +177,12 @@ if st.session_state.get("show_exam", False):
             ("⑥ 牙周探診", "periodontal"),
             ("⑦ 齲齒相關發現", "caries"),
             ("⑧ 整體口腔清潔", "oral_hygiene"),
+            ("矯正裝置／白斑相關", "orthodontic"),
+            ("黏膜可疑病灶", "lesion"),
+            ("義齒狀況", "prosthesis"),
+            ("口腔功能", "oral_function"),
+            ("吞嚥／營養風險", "swallowing"),
+            ("孕期相關觀察", "pregnancy_related"),
         ]
 
         for title, field in exam_items:
@@ -241,7 +247,7 @@ if st.session_state.get("show_exam", False):
                 st.write(plan["preventive_plan"])
 
             st.divider()
-            st.subheader("📊 Deterministic Evaluator v3.1｜固定規則形成性評量")
+            st.subheader("📊 Deterministic Evaluator v4.0｜固定規則形成性評量")
             st.info(
                 "分數完全由固定規則計算；AI 不參與計分。"
                 "同一病例、同一問診紀錄、同一份答案會得到相同分數。"
@@ -639,6 +645,314 @@ if st.session_state.get("show_exam", False):
                     },
                 }
 
+
+            def build_vp04_rules():
+                return {
+                    "P1": {"label": "辨識矯正裝置周圍牙菌斑控制不佳", "points": 4,
+                           "met": has_any(problem_text, ["牙菌斑", "plaque", "托槽", "矯正裝置"])},
+                    "P2": {"label": "辨識牙齦發炎／BOP", "points": 4,
+                           "met": has_any(problem_text, ["牙齦發炎", "牙齦紅腫", "bop", "探診出血", "牙齦流血"])},
+                    "P3": {"label": "辨識白斑樣脫礦風險", "points": 4,
+                           "met": has_any(problem_text, ["白斑", "脫礦", "白白", "white spot"])},
+                    "P4": {"label": "辨識矯正器周圍與牙間清潔不足", "points": 4,
+                           "met": has_any(problem_text, ["牙間刷", "穿線器", "牙間清潔", "托槽", "弓線", "清潔不足"])},
+                    "P5": {"label": "辨識高頻率運動飲料／甜食暴露", "points": 4,
+                           "met": has_any(problem_text, ["運動飲料", "巧克力", "餅乾", "能量棒", "含糖", "甜食"])},
+
+                    "R1": {"label": "連結固定矯正裝置與牙菌斑滯留風險", "points": 5,
+                           "met": has_all_groups(risk_text, [["矯正", "托槽", "弓線"], ["牙菌斑", "滯留", "清潔"]])},
+                    "R2": {"label": "連結運動飲料／甜食頻率與脫礦／齲齒風險", "points": 5,
+                           "met": has_all_groups(risk_text, [["運動飲料", "甜食", "餅乾", "能量棒", "糖", "酸"], ["脫礦", "白斑", "齲齒", "風險"]])},
+                    "R3": {"label": "辨識牙間清潔不足與牙齦發炎風險", "points": 5,
+                           "met": has_all_groups(risk_text, [["牙間刷", "穿線器", "牙間清潔", "清潔不足"], ["牙齦", "bop", "發炎", "風險"]])},
+                    "R4": {"label": "辨識專業清潔／一般牙科追蹤不足", "points": 5,
+                           "met": has_any(risk_text, ["一年沒有", "一年未", "專業清潔", "一般牙科", "追蹤不足"])},
+                    "R5": {"label": "辨識保護因子與外觀相關改變動機", "points": 5,
+                           "met": has_any(risk_text, ["含氟牙膏", "不抽菸", "規律矯正", "在意外觀", "願意改", "動機"])},
+
+                    "C1": {"label": "提出早晚含氟牙膏刷牙並加強托槽周圍清潔", "points": 5,
+                           "met": has_any(care_text, ["早晚", "每天兩次", "至少兩次"]) and
+                                  has_any(care_text, ["含氟牙膏", "含氟"]) and
+                                  has_any(care_text, ["托槽", "弓線", "牙齦邊緣", "矯正"])},
+                    "C2": {"label": "提出每日牙間刷／穿線器清潔", "points": 5,
+                           "met": has_any(care_text, ["牙間刷", "穿線器", "牙線"]) and
+                                  has_any(care_text, ["每天", "每日", "晚上"])},
+                    "C3": {"label": "降低運動飲料與甜點攝取頻率並以水為主", "points": 5,
+                           "met": has_any(care_text, ["運動飲料", "甜點", "餅乾", "巧克力", "能量棒"]) and
+                                  has_any(care_text, ["減少", "降低", "避免", "改為"]) and
+                                  has_any(care_text, ["白開水", "水"])},
+                    "C4": {"label": "白斑樣脫礦轉介並提出合理氟化物預防方向", "points": 5,
+                           "met": has_any(care_text, ["白斑", "脫礦"]) and
+                                  has_any(care_text, ["牙醫師", "牙醫", "矯正醫師", "評估", "轉介"]) and
+                                  has_any(care_text, ["氟化物", "含氟", "防齲"])},
+                    "C5": {"label": "以青少年可接受的小目標進行行為改變", "points": 5,
+                           "met": has_any(care_text, ["小目標", "共同設定", "避免責備", "不責備", "簡單目標", "願意"])},
+
+                    "L1": {"label": "連結矯正裝置、牙菌斑與牙齦發炎", "points": 5,
+                           "met": has_all_groups(all_plan_text, [["矯正", "托槽", "弓線"], ["牙菌斑", "清潔"], ["牙齦", "bop", "發炎"]])},
+                    "L2": {"label": "連結糖／酸暴露與白斑脫礦", "points": 5,
+                           "met": has_all_groups(all_plan_text, [["運動飲料", "糖", "酸", "甜食"], ["白斑", "脫礦", "齲齒"]])},
+                    "L3": {"label": "區分口衛照護與牙醫／矯正醫師評估角色", "points": 5,
+                           "met": has_any(care_text, ["牙醫師", "牙醫", "矯正醫師", "評估", "轉介"]) and
+                                  has_any(care_text, ["刷牙", "牙間刷", "飲食", "衛教"])},
+
+                    "M1": {"label": "問診涵蓋矯正清潔、飲食與生活習慣", "points": 5,
+                           "met": count_domains(transcript, [
+                               ["流血", "白斑", "白白"], ["矯正", "牙套"], ["洗牙", "看牙"], ["刷牙"],
+                               ["牙間刷", "穿線器", "牙線"], ["牙膏", "含氟"], ["運動飲料"],
+                               ["點心", "餅乾", "巧克力", "能量棒"], ["抽菸"], ["檳榔"], ["願意", "習慣"]
+                           ]) >= 7},
+                    "M2": {"label": "衛教尊重青少年自主並連結其外觀動機", "points": 5,
+                           "met": has_any(care_text, ["共同設定", "小目標", "避免責備", "不責備", "青少年", "外觀"])},
+                    "F1": {"label": "提出合理短期追蹤與白斑轉介", "points": 5,
+                           "met": has_any(care_text, ["6–8週", "6-8週", "追蹤", "重新評估"]) and
+                                  has_any(care_text, ["白斑", "牙醫師", "矯正醫師", "轉介", "評估"])}
+                }
+
+            def build_vp05_rules():
+                return {
+                    "P1": {"label": "辨識持續超過兩週的可疑口腔黏膜病灶", "points": 4,
+                           "met": has_any(problem_text, ["三週", "3週", "超過兩週", "持續", "可疑黏膜", "白色角化", "紅色變化"])},
+                    "P2": {"label": "辨識長期檳榔暴露", "points": 4,
+                           "met": has_any(problem_text, ["檳榔", "嚼檳榔"])},
+                    "P3": {"label": "辨識長期吸菸暴露", "points": 4,
+                           "met": has_any(problem_text, ["吸菸", "抽菸", "香菸"])},
+                    "P4": {"label": "辨識規律飲酒暴露", "points": 4,
+                           "met": has_any(problem_text, ["飲酒", "喝酒", "酒精"])},
+                    "P5": {"label": "辨識牙菌斑／牙結石與追蹤不足", "points": 4,
+                           "met": has_any(problem_text, ["牙菌斑", "牙結石", "兩年半", "未規律", "牙科照護"])},
+
+                    "R1": {"label": "連結檳榔與口腔癌風險", "points": 5,
+                           "met": has_all_groups(risk_text, [["檳榔"], ["口腔癌", "癌症", "癌", "高風險"]])},
+                    "R2": {"label": "連結吸菸與口腔癌風險", "points": 5,
+                           "met": has_all_groups(risk_text, [["吸菸", "抽菸", "香菸"], ["口腔癌", "癌症", "高風險"]])},
+                    "R3": {"label": "連結飲酒與口腔癌風險", "points": 5,
+                           "met": has_all_groups(risk_text, [["飲酒", "喝酒", "酒精"], ["口腔癌", "癌症", "高風險"]])},
+                    "R4": {"label": "辨識持續性不易擦除病灶需儘速評估", "points": 5,
+                           "met": has_any(risk_text, ["超過兩週", "三週", "持續", "不易擦除", "需儘速", "警訊", "轉介"])},
+                    "R5": {"label": "辨識病人具有可介入的戒除／轉介意願", "points": 5,
+                           "met": has_any(risk_text, ["願意", "考慮戒", "接受轉介", "減量", "可介入"])},
+
+                    "C1": {"label": "優先儘速轉介牙醫／口腔醫學專業評估", "points": 5,
+                           "met": has_any(care_text, ["儘速", "盡快", "優先"]) and
+                                  has_any(care_text, ["牙醫師", "口腔醫學", "口腔外科", "轉介", "專業評估"])},
+                    "C2": {"label": "避免自行宣告癌症或確定診斷", "points": 5,
+                           "met": has_any(care_text, ["不宣告", "不自行", "需要進一步確認", "尚未確定", "不是直接診斷"])},
+                    "C3": {"label": "提供非責備式菸檳酒風險衛教", "points": 5,
+                           "met": has_any(care_text, ["非責備", "避免責備", "不責備"]) and
+                                  count_domains(care_text, [["檳榔"], ["吸菸", "抽菸"], ["酒精", "飲酒"]]) >= 2},
+                    "C4": {"label": "評估戒菸／戒檳意願並提供適當轉介", "points": 5,
+                           "met": has_any(care_text, ["戒菸", "戒檳", "戒除"]) and
+                                  has_any(care_text, ["意願", "動機", "資源", "轉介"])},
+                    "C5": {"label": "改善基本口腔清潔與定期黏膜追蹤", "points": 5,
+                           "met": has_any(care_text, ["刷牙", "牙間清潔", "專業口腔清潔"]) and
+                                  has_any(care_text, ["黏膜", "追蹤", "檢查"])},
+
+                    "L1": {"label": "整合菸、檳榔、酒精與持續性病灶為高風險情境", "points": 5,
+                           "met": count_domains(all_plan_text, [["檳榔"], ["吸菸", "抽菸"], ["酒精", "飲酒"], ["三週", "超過兩週", "持續", "病灶"]]) >= 3},
+                    "L2": {"label": "辨識警訊優先於一般口腔清潔問題", "points": 5,
+                           "met": has_any(care_text, ["優先", "儘速", "盡快"]) and has_any(care_text, ["病灶", "黏膜", "轉介"])},
+                    "L3": {"label": "區分口衛風險辨識與專科診斷／切片角色", "points": 5,
+                           "met": has_any(care_text, ["不自行", "牙醫師", "專科", "切片", "病理", "評估"])},
+
+                    "M1": {"label": "問診涵蓋病灶警訊與完整菸檳酒史", "points": 5,
+                           "met": count_domains(transcript, [
+                               ["多久", "三週", "病灶"], ["痛", "出血"], ["吞嚥"], ["體重"], ["脖子", "腫塊"],
+                               ["抽菸", "吸菸"], ["檳榔"], ["喝酒", "飲酒"], ["戒菸", "戒檳"], ["慢性病", "用藥"], ["看牙"]
+                           ]) >= 7},
+                    "M2": {"label": "溝通不恐嚇、不武斷並支持改變", "points": 5,
+                           "met": has_any(care_text, ["非責備", "不責備", "不宣告", "尚未確定", "願意", "支持"])},
+                    "F1": {"label": "提出儘速專科轉介與後續警訊追蹤", "points": 5,
+                           "met": has_any(care_text, ["儘速", "盡快", "轉介"]) and
+                                  has_any(care_text, ["口腔醫學", "口腔外科", "牙醫師", "專科"]) and
+                                  has_any(care_text, ["變大", "出血", "疼痛", "吞嚥", "頸部", "警訊", "追蹤"])}
+                }
+
+            def build_vp06_rules():
+                return {
+                    "P1": {"label": "辨識牙菌斑控制不佳", "points": 4,
+                           "met": has_any(problem_text, ["牙菌斑", "plaque", "清潔不足"])},
+                    "P2": {"label": "辨識牙齦發炎／BOP", "points": 4,
+                           "met": has_any(problem_text, ["牙齦發炎", "bop", "牙齦紅腫", "探診出血"])},
+                    "P3": {"label": "辨識刷牙頻率／時間不足", "points": 4,
+                           "met": has_any(problem_text, ["一天一次", "刷牙一次", "30", "60秒", "刷牙時間短"])},
+                    "P4": {"label": "辨識感覺敏感影響口腔照護接受度", "points": 4,
+                           "met": has_any(problem_text, ["感覺敏感", "薄荷", "泡沫", "電動牙刷", "聲音", "味道"])},
+                    "P5": {"label": "辨識牙間清潔與甜食風險", "points": 4,
+                           "met": has_any(problem_text, ["牙間清潔", "牙線", "軟糖", "餅乾", "含糖飲料"])},
+
+                    "R1": {"label": "連結感覺敏感與刷牙／牙膏接受度", "points": 5,
+                           "met": has_all_groups(risk_text, [["感覺敏感", "薄荷", "泡沫", "聲音", "電動牙刷"], ["刷牙", "牙膏", "接受度"]])},
+                    "R2": {"label": "辨識刷牙與牙間清潔不足造成牙菌斑／牙齦風險", "points": 5,
+                           "met": has_all_groups(risk_text, [["刷牙", "牙間清潔", "牙線"], ["牙菌斑", "牙齦", "bop", "風險"]])},
+                    "R3": {"label": "辨識黏性甜食／含糖飲料風險", "points": 5,
+                           "met": has_any(risk_text, ["軟糖", "餅乾", "含糖飲料", "甜食", "糖"])},
+                    "R4": {"label": "辨識固定流程與視覺支持為保護因子", "points": 5,
+                           "met": has_any(risk_text, ["固定流程", "圖片", "視覺", "步驟表", "固定順序"])},
+                    "R5": {"label": "辨識本人自主與照顧者支持", "points": 5,
+                           "met": has_any(risk_text, ["自主", "媽媽", "照顧者", "支持", "協助"])},
+
+                    "C1": {"label": "選擇可接受的軟毛牙刷與低刺激含氟牙膏", "points": 5,
+                           "met": has_any(care_text, ["軟毛牙刷", "普通牙刷"]) and
+                                  has_any(care_text, ["含氟", "牙膏"]) and
+                                  has_any(care_text, ["溫和", "低泡", "泡沫較少", "味道"])},
+                    "C2": {"label": "使用固定流程／視覺步驟逐步增加刷牙", "points": 5,
+                           "met": has_any(care_text, ["固定時間", "固定順序", "視覺", "圖片", "步驟表"]) and
+                                  has_any(care_text, ["逐步", "小目標", "增加", "穩定"])},
+                    "C3": {"label": "逐步導入牙間清潔並允許必要協助", "points": 5,
+                           "met": has_any(care_text, ["牙線", "牙間清潔", "牙間刷"]) and
+                                  has_any(care_text, ["逐步", "協助", "媽媽", "照顧者"])},
+                    "C4": {"label": "降低甜食／含糖飲料頻率", "points": 5,
+                           "met": has_any(care_text, ["軟糖", "餅乾", "含糖飲料", "甜食"]) and
+                                  has_any(care_text, ["減少", "降低", "避免"])},
+                    "C5": {"label": "提出感覺友善、非強迫的牙科就診策略", "points": 5,
+                           "met": has_any(care_text, ["tell-show-do", "事前預告", "先說明", "短時間", "分段", "降低聲光", "降低刺激"]) and
+                                  has_any(care_text, ["不強迫", "不恐嚇", "自主", "選擇"])},
+
+                    "L1": {"label": "連結感覺敏感、刷牙接受度與牙菌斑控制", "points": 5,
+                           "met": has_all_groups(all_plan_text, [["感覺敏感", "泡沫", "薄荷", "聲音"], ["刷牙", "牙膏"], ["牙菌斑", "清潔"]])},
+                    "L2": {"label": "把環境／流程調整視為行為支持而非不配合", "points": 5,
+                           "met": has_any(care_text, ["固定流程", "視覺", "降低刺激", "事前預告"]) and
+                                  has_any(care_text, ["不強迫", "自主", "選擇", "支持"])},
+                    "L3": {"label": "兼顧本人自主與照顧者協助", "points": 5,
+                           "met": has_any(care_text, ["自主", "本人", "選擇"]) and
+                                  has_any(care_text, ["媽媽", "照顧者", "協助", "支持"])},
+
+                    "M1": {"label": "問診涵蓋感覺偏好、日常流程與照顧者資訊", "points": 5,
+                           "met": count_domains(transcript, [
+                               ["不喜歡", "味道", "泡泡", "泡沫"], ["刷牙幾次", "刷牙"], ["電動牙刷", "普通牙刷"],
+                               ["牙線", "牙間刷"], ["點心", "軟糖", "餅乾"], ["看牙", "聲音", "燈光"],
+                               ["固定時間", "固定順序"], ["圖片", "視覺"], ["媽媽", "協助"], ["牙膏"]
+                           ]) >= 7},
+                    "M2": {"label": "溝通尊重神經多樣性與本人選擇", "points": 5,
+                           "met": has_any(care_text, ["自主", "選擇", "不強迫", "不恐嚇", "本人"])},
+                    "F1": {"label": "提出合理短期追蹤與逐步調整", "points": 5,
+                           "met": has_any(care_text, ["6–8週", "6-8週", "追蹤", "重新評估"]) and
+                                  has_any(care_text, ["plaque", "牙菌斑", "bop", "刷牙", "接受度"])}
+                }
+
+            def build_vp07_rules():
+                return {
+                    "P1": {"label": "辨識咀嚼能力下降／進食時間延長", "points": 4,
+                           "met": has_any(problem_text, ["咀嚼", "咬不動", "吃飯變慢", "用餐時間", "硬食"])},
+                    "P2": {"label": "辨識飲水嗆咳與吞嚥風險", "points": 4,
+                           "met": has_any(problem_text, ["嗆", "嗆咳", "吞嚥", "喝水會咳"])},
+                    "P3": {"label": "辨識近期體重下降／營養風險", "points": 4,
+                           "met": has_any(problem_text, ["4公斤", "4 公斤", "體重下降", "減重", "食量下降", "營養"])},
+                    "P4": {"label": "辨識義齒穩定度與夜間配戴問題", "points": 4,
+                           "met": has_any(problem_text, ["義齒", "假牙", "鬆動", "穩定度", "戴著睡覺", "夜間"])},
+                    "P5": {"label": "辨識剩餘牙齒／義齒清潔不足", "points": 4,
+                           "met": has_any(problem_text, ["牙菌斑", "清潔不足", "牙間清潔", "義齒清潔"])},
+
+                    "R1": {"label": "連結缺牙／義齒不穩與咀嚼功能下降", "points": 5,
+                           "met": has_all_groups(risk_text, [["缺牙", "義齒", "假牙", "鬆動"], ["咀嚼", "咬", "吃飯", "功能"]])},
+                    "R2": {"label": "辨識嗆咳需吞嚥專業評估", "points": 5,
+                           "met": has_any(risk_text, ["嗆", "嗆咳", "吞嚥"]) and has_any(risk_text, ["評估", "風險", "轉介"])},
+                    "R3": {"label": "辨識體重下降／食量下降之營養風險", "points": 5,
+                           "met": has_any(risk_text, ["體重下降", "4公斤", "4 公斤", "食量下降"]) and has_any(risk_text, ["營養", "風險"])},
+                    "R4": {"label": "辨識義齒夜間配戴與清潔風險", "points": 5,
+                           "met": has_any(risk_text, ["戴著睡覺", "夜間", "義齒"]) and has_any(risk_text, ["清潔", "黏膜", "風險"])},
+                    "R5": {"label": "辨識家庭支持為保護因子", "points": 5,
+                           "met": has_any(risk_text, ["女兒", "同住", "照顧者", "支持", "願意配合"])},
+
+                    "C1": {"label": "提出天然牙與牙間清潔", "points": 5,
+                           "met": has_any(care_text, ["早晚", "每天兩次", "刷牙"]) and has_any(care_text, ["牙間清潔", "牙線", "牙間刷"])},
+                    "C2": {"label": "提出正確義齒清潔與睡前取下", "points": 5,
+                           "met": has_any(care_text, ["義齒", "假牙"]) and
+                                  has_any(care_text, ["清潔"]) and
+                                  has_any(care_text, ["睡前取下", "晚上取下", "夜間取下", "不要戴著睡"])},
+                    "C3": {"label": "轉介牙醫師評估義齒穩定度／壓迫", "points": 5,
+                           "met": has_any(care_text, ["牙醫師", "牙醫", "轉介"]) and
+                                  has_any(care_text, ["義齒", "鬆動", "穩定度", "壓迫", "調整", "重製"])},
+                    "C4": {"label": "轉介吞嚥專業團隊評估嗆咳", "points": 5,
+                           "met": has_any(care_text, ["吞嚥", "語言治療", "復健", "轉介"]) and has_any(care_text, ["嗆", "嗆咳", "評估"])},
+                    "C5": {"label": "因體重下降轉介營養／醫療團隊", "points": 5,
+                           "met": has_any(care_text, ["體重", "營養"]) and has_any(care_text, ["營養師", "醫療團隊", "轉介", "評估"])},
+
+                    "L1": {"label": "整合口腔功能、吞嚥與營養三面向", "points": 5,
+                           "met": count_domains(all_plan_text, [["咀嚼", "口腔功能"], ["吞嚥", "嗆咳"], ["營養", "體重"]]) == 3},
+                    "L2": {"label": "辨識義齒問題需牙醫評估而非自行調整", "points": 5,
+                           "met": has_any(care_text, ["義齒"]) and has_any(care_text, ["牙醫師", "牙醫", "評估", "轉介"])},
+                    "L3": {"label": "避免自行下吞嚥／飲食質地處方並採跨專業合作", "points": 5,
+                           "met": has_any(care_text, ["不自行", "尚未完成", "由營養", "由吞嚥", "專業人員", "跨專業", "醫療團隊"])},
+
+                    "M1": {"label": "問診涵蓋咀嚼、嗆咳、體重、義齒與照顧者觀察", "points": 5,
+                           "met": count_domains(transcript, [
+                               ["咬不動", "咀嚼", "食物"], ["吃多久", "用餐"], ["嗆", "喝水"], ["體重"],
+                               ["食量"], ["義齒", "假牙", "鬆"], ["睡覺", "夜間"], ["清潔"], ["慢性病", "用藥"], ["女兒"]
+                           ]) >= 7},
+                    "M2": {"label": "溝通兼顧高齡者自主與照顧者支持", "points": 5,
+                           "met": has_any(care_text, ["本人", "阿春", "病人", "高齡者"]) and
+                                  has_any(care_text, ["女兒", "照顧者", "共同", "一起"])},
+                    "F1": {"label": "提出多專業轉介與較密集追蹤", "points": 5,
+                           "met": count_domains(care_text, [["牙醫師", "牙醫"], ["吞嚥", "語言治療", "復健"], ["營養師", "營養"]]) >= 2 and
+                                  has_any(care_text, ["1–3個月", "1-3個月", "追蹤", "重新評估"])}
+                }
+
+            def build_vp08_rules():
+                return {
+                    "P1": {"label": "辨識孕期牙齦發炎／BOP", "points": 4,
+                           "met": has_any(problem_text, ["孕期", "牙齦發炎", "bop", "牙齦流血"])},
+                    "P2": {"label": "辨識牙菌斑與牙間清潔問題", "points": 4,
+                           "met": has_any(problem_text, ["牙菌斑", "plaque", "牙間", "清潔"])},
+                    "P3": {"label": "辨識孕吐造成反覆酸性暴露", "points": 4,
+                           "met": has_any(problem_text, ["孕吐", "嘔吐", "酸性暴露", "嘴巴酸"])},
+                    "P4": {"label": "辨識孕吐後立即刷牙之酸蝕風險", "points": 4,
+                           "met": has_any(problem_text, ["立即刷牙", "馬上刷牙", "酸蝕", "磨耗"])},
+                    "P5": {"label": "辨識頻繁點心與延遲牙科照護", "points": 4,
+                           "met": count_domains(problem_text, [["蘇打餅乾", "酸梅", "點心", "零食"], ["一年半", "延後", "延遲", "未看牙"]]) >= 1},
+
+                    "R1": {"label": "連結牙菌斑與孕期牙齦發炎", "points": 5,
+                           "met": has_all_groups(risk_text, [["牙菌斑", "清潔"], ["孕期", "牙齦", "bop", "發炎"]])},
+                    "R2": {"label": "連結孕吐酸性暴露與酸蝕風險", "points": 5,
+                           "met": has_all_groups(risk_text, [["孕吐", "嘔吐", "酸"], ["酸蝕", "牙面", "磨耗", "風險"]])},
+                    "R3": {"label": "辨識孕吐後立即刷牙風險", "points": 5,
+                           "met": has_any(risk_text, ["立即刷牙", "馬上刷牙"]) and has_any(risk_text, ["風險", "酸蝕", "磨耗"])},
+                    "R4": {"label": "辨識頻繁進食／飲料增加糖酸暴露", "points": 5,
+                           "met": has_any(risk_text, ["蘇打餅乾", "酸梅", "果汁", "點心", "零食"]) and has_any(risk_text, ["頻率", "糖", "酸", "暴露", "風險"])},
+                    "R5": {"label": "辨識保護因子與就醫意願", "points": 5,
+                           "met": has_any(risk_text, ["一天兩次", "主要喝水", "不抽菸", "不嚼檳榔", "願意", "產檢"])},
+
+                    "C1": {"label": "維持早晚含氟牙膏刷牙並加強牙齦邊緣", "points": 5,
+                           "met": has_any(care_text, ["早晚", "每天兩次"]) and
+                                  has_any(care_text, ["含氟牙膏", "含氟"]) and
+                                  has_any(care_text, ["牙齦邊緣", "牙齦"])},
+                    "C2": {"label": "建立每日牙間清潔", "points": 5,
+                           "met": has_any(care_text, ["牙間清潔", "牙線", "牙間刷"]) and has_any(care_text, ["每日", "每天"])},
+                    "C3": {"label": "孕吐後先漱口並避免立即用力刷牙", "points": 5,
+                           "met": has_any(care_text, ["孕吐", "吐完"]) and
+                                  has_any(care_text, ["清水漱口", "漱口"]) and
+                                  has_any(care_text, ["避免立即", "不要馬上", "不要立即", "待", "稍後"])},
+                    "C4": {"label": "降低頻繁零食／酸性飲食並以水為主", "points": 5,
+                           "met": has_any(care_text, ["減少", "降低", "避免"]) and
+                                  has_any(care_text, ["蘇打餅乾", "酸梅", "零食", "點心", "果汁"]) and
+                                  has_any(care_text, ["白開水", "水"])},
+                    "C5": {"label": "提出孕期適當牙科檢查／清潔與安全疑慮澄清", "points": 5,
+                           "met": has_any(care_text, ["牙科檢查", "牙科照護", "專業口腔清潔", "牙周預防"]) and
+                                  has_any(care_text, ["孕期", "懷孕"]) and
+                                  has_any(care_text, ["牙醫師", "評估", "依個別狀況"])},
+
+                    "L1": {"label": "連結孕期背景、牙菌斑與牙齦發炎", "points": 5,
+                           "met": has_all_groups(all_plan_text, [["孕期", "懷孕"], ["牙菌斑", "清潔"], ["牙齦", "bop", "發炎"]])},
+                    "L2": {"label": "連結孕吐、酸暴露與刷牙時機", "points": 5,
+                           "met": has_all_groups(all_plan_text, [["孕吐", "嘔吐"], ["酸", "酸蝕"], ["立即刷牙", "漱口", "稍後刷牙"]])},
+                    "L3": {"label": "區分口衛衛教與牙醫對影像／治療之判斷", "points": 5,
+                           "met": has_any(care_text, ["不自行", "牙醫師", "評估", "依臨床需要"]) and
+                                  has_any(care_text, ["影像", "藥物", "治療", "牙科照護"])},
+
+                    "M1": {"label": "問診涵蓋孕期、孕吐、刷牙、飲食與就醫疑慮", "points": 5,
+                           "met": count_domains(transcript, [
+                               ["懷孕", "幾週", "產檢"], ["流血", "牙齦"], ["牙痛", "腫"], ["孕吐", "嘔吐"],
+                               ["吐完", "刷牙"], ["刷牙"], ["牙線"], ["點心", "餅乾", "酸梅"], ["飲料", "果汁"],
+                               ["看牙", "洗牙"], ["擔心", "寶寶", "安全"], ["抽菸"], ["檳榔"]
+                           ]) >= 7},
+                    "M2": {"label": "以非恐嚇方式回應孕期安全疑慮並共同設定目標", "points": 5,
+                           "met": has_any(care_text, ["非恐嚇", "不恐嚇", "擔心", "安全", "共同設定", "小目標", "確認理解"])},
+                    "F1": {"label": "提出短期追蹤並適當轉介牙醫師", "points": 5,
+                           "met": has_any(care_text, ["6–8週", "6-8週", "追蹤", "重新評估"]) and
+                                  has_any(care_text, ["牙醫師", "牙科檢查", "專業口腔清潔", "評估"])}
+                }
+
             if case["case_id"] == "VP01":
                 rules = build_vp01_rules()
                 teacher_extensions = [
@@ -664,6 +978,41 @@ if st.session_state.get("show_exam", False):
                     "本病例不要求學生指定含氟牙膏 ppm、專業氟化物品牌或固定處方頻率；重點是合理使用含氟牙膏與專業氟化物預防方向。",
                     "影像檢查是否需要由牙醫師依臨床情況決定；學生未主動指定 X 光不扣分。",
                     "兒童口腔衛教應同時支持孩子與照顧者，避免把責任歸咎於孩子或家長。",
+                ]
+            elif case["case_id"] == "VP04":
+                rules = build_vp04_rules()
+                teacher_extensions = [
+                    "白斑樣脫礦是否為活動性齲齒病灶、是否需要進一步處置，由牙醫師／矯正醫師依臨床評估決定。",
+                    "本病例不要求學生指定高濃度氟化物 ppm、品牌或處方頻率；合理提出含氟牙膏與專業氟化物方向即可。",
+                    "矯正治療調整由矯正醫師負責；口衛學生重點是菌斑控制、飲食頻率、行為改變與適當轉介。",
+                ]
+            elif case["case_id"] == "VP05":
+                rules = build_vp05_rules()
+                teacher_extensions = [
+                    "口腔黏膜可疑病灶的確定診斷、是否切片及病理判讀由牙醫師／口腔專科團隊負責。",
+                    "學生不可直接告知病人『這就是癌症』；應使用警訊、風險與儘速轉介的語言。",
+                    "戒菸、戒檳藥物或進階成癮治療由具資格之專業團隊評估；口衛學生可進行風險衛教與轉介。",
+                ]
+            elif case["case_id"] == "VP06":
+                rules = build_vp06_rules()
+                teacher_extensions = [
+                    "不應以強迫、約束或恐嚇作為日常口腔照護的預設策略；感覺與環境調整應優先。",
+                    "含氟牙膏的具體品牌可依病人的感覺偏好與臨床需求選擇；本案例不要求指定品牌或 ppm。",
+                    "需要進一步行為支持時可與熟悉病人的照顧者及相關專業團隊合作，同時維持本人自主性。",
+                ]
+            elif case["case_id"] == "VP07":
+                rules = build_vp07_rules()
+                teacher_extensions = [
+                    "吞嚥障礙的確定診斷與治療由具資格之吞嚥／復健專業團隊執行；口衛學生重點是辨識警訊與轉介。",
+                    "義齒調整、重製與咬合處理由牙醫師評估；學生不自行修改義齒。",
+                    "具體飲食質地、熱量或營養處方應由吞嚥與營養專業人員個別化決定。",
+                ]
+            elif case["case_id"] == "VP08":
+                rules = build_vp08_rules()
+                teacher_extensions = [
+                    "孕期影像、局部麻醉、藥物或侵入性治療是否需要及如何執行，由牙醫師依臨床狀況與孕期評估。",
+                    "學生不應以『懷孕不能看牙』作為延後必要照護的理由，也不需自行背誦所有孕期治療規範。",
+                    "本病例核心是牙菌斑控制、孕吐後口腔照護、降低頻繁糖酸暴露與回應孕婦安全疑慮。",
                 ]
             else:
                 st.error("此病例尚未建立固定評分規則。")
@@ -770,5 +1119,5 @@ if st.session_state.get("show_exam", False):
 
 st.caption(
     "目前為教學 MVP：AI 虛擬病人＋Clinical Supervisor＋學生臨床判斷＋"
-    "Deterministic Evaluator v3.1。請勿輸入真實病人可識別資料。"
+    "Deterministic Evaluator v4.0。請勿輸入真實病人可識別資料。"
 )
