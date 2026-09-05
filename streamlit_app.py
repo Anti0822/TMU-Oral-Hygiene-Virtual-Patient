@@ -44,7 +44,7 @@ if not cases:
 case_names = list(cases.keys())
 
 st.title("🦷 TMU 口腔衛生學系 AI 虛擬病人")
-st.caption("Multi-Case v4.0｜Patient Agent＋Caregiver Role＋Clinical Supervisor＋Deterministic Evaluator")
+st.caption("Multi-Case v4.2 Image｜Patient Agent＋Clinical Images＋Clinical Supervisor＋Deterministic Evaluator")
 
 selected_file = st.selectbox(
     "📚 選擇虛擬病人病例",
@@ -76,7 +76,7 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 patient_case = {
     k: v
     for k, v in case.items()
-    if k not in {"clinical_exam", "oral_health_risks", "evaluation_config"}
+    if k not in {"clinical_exam", "oral_health_risks", "evaluation_config", "clinical_images", "image_disclaimer"}
 }
 
 with st.expander("📋 學生可見病例起始資訊", expanded=True):
@@ -197,6 +197,62 @@ if st.session_state.get("show_exam", False):
         if exam.get("supervisor_note"):
             st.info(exam["supervisor_note"])
 
+        # ==========================================
+        # Clinical Reference Images
+        # ==========================================
+        clinical_images = case.get("clinical_images", [])
+        if clinical_images:
+            st.divider()
+            st.subheader("🖼️ Clinical Reference Images｜臨床教學影像")
+            st.caption(
+                case.get(
+                    "image_disclaimer",
+                    "以下影像僅供情境學習使用，不代表虛擬病人本人。"
+                )
+            )
+
+            columns = st.columns(min(3, len(clinical_images)))
+
+            for idx, image in enumerate(clinical_images):
+                with columns[idx % len(columns)]:
+                    st.markdown(f"**{image.get('title', '教學影像')}**")
+                    try:
+                        st.image(
+                            image.get("image_url"),
+                            caption=image.get("caption", ""),
+                            use_container_width=True,
+                        )
+                    except Exception:
+                        st.warning("影像暫時無法載入，請使用下方來源連結查看。")
+
+                    if image.get("teaching_note"):
+                        st.caption(image["teaching_note"])
+
+                    # 遠端影像若因來源網站限制未顯示，學生仍可開啟原始來源頁面。
+                    if image.get("source_url"):
+                        st.markdown(
+                            f"[↗ 查看影像原始來源]({image['source_url']})"
+                        )
+
+            with st.expander("📚 影像來源、作者與授權", expanded=False):
+                for image in clinical_images:
+                    st.markdown(f"**{image.get('title', '教學影像')}**")
+                    st.write(f"作者：{image.get('author_credit', '未標示')}")
+                    if image.get("source_title"):
+                        st.write(f"來源：{image['source_title']}")
+                    st.write(f"授權：{image.get('license', '請查閱來源')}")
+                    st.write(
+                        "是否修改："
+                        + ("有修改" if image.get("modified") else "未修改")
+                    )
+                    if image.get("usage_note"):
+                        st.write(image["usage_note"])
+                    if image.get("source_url"):
+                        st.markdown(f"[原始來源頁面]({image['source_url']})")
+                    if image.get("license_url"):
+                        st.markdown(f"[授權條款]({image['license_url']})")
+                    st.markdown("---")
+
         st.divider()
         st.subheader("📝 學生臨床判斷")
 
@@ -247,7 +303,7 @@ if st.session_state.get("show_exam", False):
                 st.write(plan["preventive_plan"])
 
             st.divider()
-            st.subheader("📊 Deterministic Evaluator v4.0｜固定規則形成性評量")
+            st.subheader("📊 Deterministic Evaluator v4.2｜固定規則形成性評量")
             st.info(
                 "分數完全由固定規則計算；AI 不參與計分。"
                 "同一病例、同一問診紀錄、同一份答案會得到相同分數。"
@@ -1119,5 +1175,5 @@ if st.session_state.get("show_exam", False):
 
 st.caption(
     "目前為教學 MVP：AI 虛擬病人＋Clinical Supervisor＋學生臨床判斷＋"
-    "Deterministic Evaluator v4.0。請勿輸入真實病人可識別資料。"
+    "Deterministic Evaluator v4.2。請勿輸入真實病人可識別資料。"
 )
