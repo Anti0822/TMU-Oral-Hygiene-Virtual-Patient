@@ -1,0 +1,67 @@
+# ============================================================
+# HPV-status-associated metabolic, O-GlcNAc and immune-escape programs
+# in oral and oropharyngeal squamous cell carcinoma
+# 全域設定檔：所有 scripts 皆由此讀取路徑、閾值與資料集清單
+# ============================================================
+
+seed: 20260929
+
+paths:
+  metadata: "00_metadata"
+  raw: "01_raw_data"
+  processed: "02_processed_data"
+  bulk: "03_bulk_analysis"
+  meta: "04_meta_analysis"
+  pathway: "05_pathway_analysis"
+  immune: "06_immune_analysis"
+  singlecell: "07_single_cell"
+  survival: "08_survival"
+  figures: "09_figures"
+  tables: "10_tables"
+  results: "results"
+
+# DEG 閾值（主要）；GSEA 一律使用完整 ranked list
+deg:
+  padj_cutoff: 0.05
+  lfc_cutoff: 1
+  reference_level: "HPV_neg"     # HPV⁻ 為 reference → log2FC > 0 表示 HPV⁺ 較高
+  min_group_n: 3                 # 任一組 < 3 不做正式 DEG，只做描述
+
+# 核心基因。OGA 為 HGNC 現行核准符號；MGEA5 為舊符號（多數 microarray 註解仍使用）
+core_genes: ["OGT", "OGA", "MTHFD2", "CORO1A", "CD274"]
+gene_aliases:
+  OGA: ["MGEA5", "OGA", "KIAA0679", "NCOAT", "MEA5"]
+  CD274: ["CD274", "PDL1", "B7-H1", "B7H1", "PD-L1"]
+  MTHFD2: ["MTHFD2", "NMDMC"]
+  OGT: ["OGT", "HRNT1", "O-GLCNAC"]
+  CORO1A: ["CORO1A", "CLABP", "HCORO1", "CLIPINA", "TACO"]
+
+# 需下載與稽核的資料集（角色需在稽核後由 00_metadata/dataset_audit_table.csv 最終確認）
+datasets:
+  bulk:
+    - {id: "GSE72536",  type: "rnaseq_counts", role: "discovery_candidate"}
+    - {id: "GSE55544",  type: "microarray",    role: "discovery_candidate"}
+    - {id: "GSE55542",  type: "microarray",    role: "audit_only"}
+    - {id: "GSE3292",   type: "microarray",    role: "discovery_candidate"}
+    - {id: "GSE6791",   type: "microarray",    role: "discovery_candidate"}
+    - {id: "GSE40774",  type: "microarray",    role: "discovery_candidate"}
+    - {id: "GSE65858",  type: "microarray",    role: "validation_survival"}
+    - {id: "GSE74927",  type: "rnaseq_counts", role: "hpv_activity_candidate"}
+    - {id: "GSE112026", type: "rnaseq_counts", role: "hpv_pos_only"}
+    - {id: "GSE40020",  type: "microarray",    role: "hpv_pos_only"}
+    - {id: "GSE41613",  type: "microarray",    role: "hpv_neg_oral_survival"}
+    - {id: "GSE184616", type: "unknown",       role: "audit_only"}
+    - {id: "GSE162519", type: "unknown",       role: "audit_only"}
+  singlecell:
+    - {id: "GSE164690", role: "primary_sc"}
+    - {id: "GSE139324", role: "immune_sc"}
+    - {id: "GSE182227", role: "opscc_sc_hpv"}
+    - {id: "GSE173468", role: "audit_only"}
+  cellline:
+    - {id: "GSE122512", role: "audit_only"}
+    - {id: "GSE62027",  role: "cellline"}
+
+# TCGA-HNSC：HPV 狀態以 RNA-based E6/E7 reads 為主（Level A/B），p16 僅作 Level D
+tcga:
+  project: "TCGA-HNSC"
+  hpv_rna_reads_cutoff: 1000     # TCGA 2015 Nature 之經驗門檻：>1000 mapped reads，主要 E6/E7

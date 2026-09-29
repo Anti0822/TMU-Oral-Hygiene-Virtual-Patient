@@ -1,0 +1,11 @@
+gene,druggability,druggability_note,wetlab_feasibility,feasibility_note
+CD274,1.0,"已核准 anti-PD-L1（atezolizumab、durvalumab、avelumab）；anti-PD-1（pembrolizumab、nivolumab）已核准用於 R/M HNSCC",0.9,"flow cytometry、WB、EV 中 PD-L1 ELISA/WB 皆成熟；IFN-γ 誘導為必要對照"
+MTHFD2,0.7,"工具化合物：DS18561882（MTHFD2 選擇性）、LY345899（MTHFD1/2 folate analog）；尚無核准藥物",0.9,"siRNA/shRNA/CRISPR、qPCR/WB 容易；可做 formate/glycine rescue 以區分代謝依賴"
+OGT,0.6,"工具化合物：OSMI-1、OSMI-4；OGT 為必需基因，完全剔除易致死 → 建議 inducible knockdown",0.8,"RL2/CTD110.6 抗體偵測 global O-GlcNAc；需同時量 OGT 與 OGA 蛋白（回饋調控）"
+OGA,0.7,"Thiamet-G（機制性工具，提高 O-GlcNAc）；臨床階段 OGA inhibitor 主要用於 tauopathy",0.8,"與 OGT 操弄成對設計；O-GlcNAc 上升時 OGA 常代償性上升"
+CORO1A,0.1,"無直接抑制劑（間接：actin/F-actin 路徑工具）",0.5,"若 single-cell 顯示主要表現於免疫細胞，腫瘤細胞模型可能表現量低 → 先以 qPCR/WB 確認 SCC47/SCC104 內源表現"
+GFPT1,0.4,"工具：6-diazo-5-oxo-L-norleucine（DON，非選擇性 glutamine antagonist）、azaserine",0.8,"HBP 限速酶；可做 GlcNAc 補充 rescue"
+SLC2A1,0.5,"工具：BAY-876、WZB117",0.8,"葡萄糖攝取 2-NBDG"
+SHMT2,0.5,"工具：SHIN1/SHIN2（SHMT1/2）",0.8,"serine/glycine 追蹤"
+PHGDH,0.5,"工具：NCT-503、CBR-5884",0.8,""
+RAB27A,0.2,"無選擇性抑制劑（Nexinhib20 影響 RAB27A–JFC1）",0.7,"EV 分泌功能讀值：NTA、CD63/CD9/CD81"

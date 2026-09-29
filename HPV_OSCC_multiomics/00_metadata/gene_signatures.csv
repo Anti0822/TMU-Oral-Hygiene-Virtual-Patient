@@ -1,0 +1,131 @@
+signature,gene,source_note
+HBP_OGlcNAc,GFPT1,使用者指定；HBP 酵素依 KEGG hsa00520（Amino sugar and nucleotide sugar metabolism）HBP 分支。SLC2A1/MYC 為上游調控，另列 HBP_upstream。僅為 mRNA 層級，不等於 O-GlcNAc 蛋白修飾量
+HBP_OGlcNAc,GFPT2,使用者指定；HBP 酵素依 KEGG hsa00520（Amino sugar and nucleotide sugar metabolism）HBP 分支。SLC2A1/MYC 為上游調控，另列 HBP_upstream。僅為 mRNA 層級，不等於 O-GlcNAc 蛋白修飾量
+HBP_OGlcNAc,GNPNAT1,使用者指定；HBP 酵素依 KEGG hsa00520（Amino sugar and nucleotide sugar metabolism）HBP 分支。SLC2A1/MYC 為上游調控，另列 HBP_upstream。僅為 mRNA 層級，不等於 O-GlcNAc 蛋白修飾量
+HBP_OGlcNAc,PGM3,使用者指定；HBP 酵素依 KEGG hsa00520（Amino sugar and nucleotide sugar metabolism）HBP 分支。SLC2A1/MYC 為上游調控，另列 HBP_upstream。僅為 mRNA 層級，不等於 O-GlcNAc 蛋白修飾量
+HBP_OGlcNAc,UAP1,使用者指定；HBP 酵素依 KEGG hsa00520（Amino sugar and nucleotide sugar metabolism）HBP 分支。SLC2A1/MYC 為上游調控，另列 HBP_upstream。僅為 mRNA 層級，不等於 O-GlcNAc 蛋白修飾量
+HBP_OGlcNAc,OGT,使用者指定；HBP 酵素依 KEGG hsa00520（Amino sugar and nucleotide sugar metabolism）HBP 分支。SLC2A1/MYC 為上游調控，另列 HBP_upstream。僅為 mRNA 層級，不等於 O-GlcNAc 蛋白修飾量
+HBP_OGlcNAc,OGA,使用者指定；HBP 酵素依 KEGG hsa00520（Amino sugar and nucleotide sugar metabolism）HBP 分支。SLC2A1/MYC 為上游調控，另列 HBP_upstream。僅為 mRNA 層級，不等於 O-GlcNAc 蛋白修飾量
+HBP_upstream,SLC2A1,使用者指定：葡萄糖攝取與 MYC 對 GFPT1 的調控（探索性）
+HBP_upstream,MYC,使用者指定：葡萄糖攝取與 MYC 對 GFPT1 的調控（探索性）
+HBP_upstream,GFPT1,使用者指定：葡萄糖攝取與 MYC 對 GFPT1 的調控（探索性）
+Mito_one_carbon,MTHFD2,"粒線體葉酸單碳代謝酵素與轉運（Ducker & Rabinowitz, Cell Metab 2017 綜述）"
+Mito_one_carbon,MTHFD1L,"粒線體葉酸單碳代謝酵素與轉運（Ducker & Rabinowitz, Cell Metab 2017 綜述）"
+Mito_one_carbon,SHMT2,"粒線體葉酸單碳代謝酵素與轉運（Ducker & Rabinowitz, Cell Metab 2017 綜述）"
+Mito_one_carbon,ALDH1L2,"粒線體葉酸單碳代謝酵素與轉運（Ducker & Rabinowitz, Cell Metab 2017 綜述）"
+Mito_one_carbon,SLC25A32,"粒線體葉酸單碳代謝酵素與轉運（Ducker & Rabinowitz, Cell Metab 2017 綜述）"
+Cyto_one_carbon_nucleotide,SHMT1,細胞質單碳／核苷酸合成（使用者指定）
+Cyto_one_carbon_nucleotide,TYMS,細胞質單碳／核苷酸合成（使用者指定）
+Cyto_one_carbon_nucleotide,DHFR,細胞質單碳／核苷酸合成（使用者指定）
+Serine_synthesis,PHGDH,serine de novo synthesis（使用者指定）
+Serine_synthesis,PSAT1,serine de novo synthesis（使用者指定）
+Serine_synthesis,PSPH,serine de novo synthesis（使用者指定）
+IFNG_6gene_Ayers,IDO1,"Ayers et al., J Clin Invest 2017 IFN-γ 6-gene signature"
+IFNG_6gene_Ayers,CXCL10,"Ayers et al., J Clin Invest 2017 IFN-γ 6-gene signature"
+IFNG_6gene_Ayers,CXCL9,"Ayers et al., J Clin Invest 2017 IFN-γ 6-gene signature"
+IFNG_6gene_Ayers,HLA-DRA,"Ayers et al., J Clin Invest 2017 IFN-γ 6-gene signature"
+IFNG_6gene_Ayers,STAT1,"Ayers et al., J Clin Invest 2017 IFN-γ 6-gene signature"
+IFNG_6gene_Ayers,IFNG,"Ayers et al., J Clin Invest 2017 IFN-γ 6-gene signature"
+IFN_signaling_core,IFNG,使用者指定 IFN-γ/JAK-STAT 軸
+IFN_signaling_core,IFNGR1,使用者指定 IFN-γ/JAK-STAT 軸
+IFN_signaling_core,IFNGR2,使用者指定 IFN-γ/JAK-STAT 軸
+IFN_signaling_core,JAK1,使用者指定 IFN-γ/JAK-STAT 軸
+IFN_signaling_core,JAK2,使用者指定 IFN-γ/JAK-STAT 軸
+IFN_signaling_core,STAT1,使用者指定 IFN-γ/JAK-STAT 軸
+IFN_signaling_core,STAT3,使用者指定 IFN-γ/JAK-STAT 軸
+IFN_signaling_core,IRF1,使用者指定 IFN-γ/JAK-STAT 軸
+IFN_signaling_core,IDO1,使用者指定 IFN-γ/JAK-STAT 軸
+Checkpoint_PDL1,CD274,使用者指定 immune checkpoint score
+Checkpoint_PDL1,PDCD1LG2,使用者指定 immune checkpoint score
+Checkpoint_PDL1,PDCD1,使用者指定 immune checkpoint score
+Checkpoint_PDL1,CTLA4,使用者指定 immune checkpoint score
+Checkpoint_PDL1,LAG3,使用者指定 immune checkpoint score
+Checkpoint_PDL1,TIGIT,使用者指定 immune checkpoint score
+Checkpoint_PDL1,HAVCR2,使用者指定 immune checkpoint score
+Checkpoint_PDL1,IDO1,使用者指定 immune checkpoint score
+Cytotoxic_T_NK,CD8A,使用者指定 cytotoxic T/NK
+Cytotoxic_T_NK,CD8B,使用者指定 cytotoxic T/NK
+Cytotoxic_T_NK,NKG7,使用者指定 cytotoxic T/NK
+Cytotoxic_T_NK,KLRK1,使用者指定 cytotoxic T/NK
+Cytotoxic_T_NK,PRF1,使用者指定 cytotoxic T/NK
+Cytotoxic_T_NK,GZMB,使用者指定 cytotoxic T/NK
+Cytotoxic_T_NK,GNLY,使用者指定 cytotoxic T/NK
+CYT_Rooney,GZMA,"Rooney et al., Cell 2015 cytolytic activity（geometric mean）"
+CYT_Rooney,PRF1,"Rooney et al., Cell 2015 cytolytic activity（geometric mean）"
+T_exhaustion,PDCD1,使用者指定 T-cell exhaustion
+T_exhaustion,CTLA4,使用者指定 T-cell exhaustion
+T_exhaustion,LAG3,使用者指定 T-cell exhaustion
+T_exhaustion,TIGIT,使用者指定 T-cell exhaustion
+T_exhaustion,HAVCR2,使用者指定 T-cell exhaustion
+T_exhaustion,TOX,使用者指定 T-cell exhaustion
+Antigen_presentation_MHCI,B2M,使用者指定 MHC-I antigen presentation
+Antigen_presentation_MHCI,TAP1,使用者指定 MHC-I antigen presentation
+Antigen_presentation_MHCI,TAP2,使用者指定 MHC-I antigen presentation
+Antigen_presentation_MHCI,HLA-A,使用者指定 MHC-I antigen presentation
+Antigen_presentation_MHCI,HLA-B,使用者指定 MHC-I antigen presentation
+Antigen_presentation_MHCI,HLA-C,使用者指定 MHC-I antigen presentation
+Antigen_presentation_MHCI,NLRC5,使用者指定 MHC-I antigen presentation
+EV_biogenesis,RAB27A,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+EV_biogenesis,RAB27B,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+EV_biogenesis,TSG101,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+EV_biogenesis,PDCD6IP,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+EV_biogenesis,SDCBP,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+EV_biogenesis,CD63,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+EV_biogenesis,CD9,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+EV_biogenesis,CD81,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+EV_biogenesis,VPS4A,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+EV_biogenesis,VPS4B,使用者指定 ESCRT/exosome secretion；刻意不含 CORO1A 以避免循環推論
+HPV_E2F_cell_cycle,E2F1,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,E2F2,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,CCNE1,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,MCM2,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,MCM3,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,MCM4,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,MCM5,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,MCM6,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,MCM7,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,PCNA,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,RRM2,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+HPV_E2F_cell_cycle,MKI67,使用者指定；與 HPV E7–RB–E2F 軸相關。CDKN2A 單獨呈現
+APOBEC3,APOBEC3A,使用者指定
+APOBEC3,APOBEC3B,使用者指定
+EMT_core,VIM,使用者指定（CDH1、EPCAM 為上皮標記，反向，單獨呈現）
+EMT_core,SNAI1,使用者指定（CDH1、EPCAM 為上皮標記，反向，單獨呈現）
+EMT_core,SNAI2,使用者指定（CDH1、EPCAM 為上皮標記，反向，單獨呈現）
+EMT_core,ZEB1,使用者指定（CDH1、EPCAM 為上皮標記，反向，單獨呈現）
+EMT_core,ZEB2,使用者指定（CDH1、EPCAM 為上皮標記，反向，單獨呈現）
+Stemness_core,SOX2,使用者指定；bulk 中 POU5F1/NANOG 常近背景值，判讀需保守
+Stemness_core,POU5F1,使用者指定；bulk 中 POU5F1/NANOG 常近背景值，判讀需保守
+Stemness_core,NANOG,使用者指定；bulk 中 POU5F1/NANOG 常近背景值，判讀需保守
+Stemness_core,ALDH1A1,使用者指定；bulk 中 POU5F1/NANOG 常近背景值，判讀需保守
+Stemness_core,CD44,使用者指定；bulk 中 POU5F1/NANOG 常近背景值，判讀需保守
+Cell_T,CD3D,canonical marker（僅作 GSVA fallback 免疫估計）
+Cell_T,CD3E,canonical marker（僅作 GSVA fallback 免疫估計）
+Cell_T,CD2,canonical marker（僅作 GSVA fallback 免疫估計）
+Cell_CD8T,CD8A,canonical marker
+Cell_CD8T,CD8B,canonical marker
+Cell_NK,NCR1,canonical marker
+Cell_NK,KLRF1,canonical marker
+Cell_NK,KLRD1,canonical marker
+Cell_B,CD19,canonical marker
+Cell_B,MS4A1,canonical marker
+Cell_B,CD79A,canonical marker
+Cell_Plasma,MZB1,canonical marker
+Cell_Plasma,JCHAIN,canonical marker
+Cell_Treg,FOXP3,canonical marker
+Cell_Treg,IL2RA,canonical marker
+Cell_Macrophage,CD68,canonical marker
+Cell_Macrophage,CD163,canonical marker
+Cell_Macrophage,CSF1R,canonical marker
+Cell_Macrophage,C1QA,canonical marker
+Cell_Macrophage,C1QB,canonical marker
+Cell_DC,CLEC9A,canonical marker
+Cell_DC,CD1C,canonical marker
+Cell_DC,LAMP3,canonical marker
+Cell_CAF,COL1A1,canonical marker
+Cell_CAF,COL1A2,canonical marker
+Cell_CAF,FAP,canonical marker
+Cell_CAF,PDGFRB,canonical marker
+Cell_Endothelial,PECAM1,canonical marker
+Cell_Endothelial,VWF,canonical marker
+Cell_Endothelial,CDH5,canonical marker
