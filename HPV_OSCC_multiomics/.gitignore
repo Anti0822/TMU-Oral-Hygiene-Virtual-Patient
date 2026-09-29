@@ -1,0 +1,10 @@
+01_raw_data/*
+02_processed_data/*
+07_single_cell/*
+*.rds
+*.h5
+*.mtx.gz
+*.tar
+results/logs/
+.Rhistory
+.RData
